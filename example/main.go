@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"scheduler"
 	"time"
+
+	"github.com/EricChiou/scheduler"
 )
 
 func main() {
