@@ -2,66 +2,78 @@ package scheduler
 
 import "time"
 
+var scheduleList []schedule
+
+func Every() *scheduler {
+	return &scheduler{}
+}
+
+func Start(index int) {
+	if index > 0 && len(scheduleList) > index && scheduleList[index] != nil {
+		scheduleList[index].start()
+	}
+}
+
+func Stop(index int) {
+	if index > 0 && len(scheduleList) > index && scheduleList[index] != nil {
+		scheduleList[index].stop()
+	}
+}
+
 type scheduler struct {
-	interval uint
 }
 
-func (s *scheduler) Second() timeSchedule {
-	return initTimeSchedule(s.interval, 0)
+func (s *scheduler) Second(interval int) *timeSchedule {
+	return initTimeSchedule(interval, 0)
 }
 
-func (s *scheduler) Minute() timeSchedule {
-	return initTimeSchedule(s.interval, 1)
+func (s *scheduler) Minute(interval int) *timeSchedule {
+	return initTimeSchedule(interval, 1)
 }
 
-func (s *scheduler) Hour() timeSchedule {
-	return initTimeSchedule(s.interval, 2)
+func (s *scheduler) Hour(interval int) *timeSchedule {
+	return initTimeSchedule(interval, 2)
 }
 
-func (s *scheduler) Day() dateSchedule {
-	var dateSchedule dateSchedule
-	dateSchedule.interval = s.interval
-
-	return dateSchedule
+func (s *scheduler) Day(day int) *dateSchedule {
+	return initDateSchedule(day, 0)
 }
 
-func (s *scheduler) Week() dateSchedule {
-	var dateSchedule dateSchedule
-
-	return dateSchedule
+func (s *scheduler) Week(day int) *dateSchedule {
+	if day < 0 || 6 < day {
+		day = int(time.Now().Weekday())
+	}
+	return initDateSchedule(day, 1)
 }
 
-func (s *scheduler) Month() dateSchedule {
-	var dateSchedule dateSchedule
-
-	return dateSchedule
+func (s *scheduler) Month(day int) *dateSchedule {
+	if day < 1 || 31 < day {
+		day = time.Now().Day()
+	}
+	return initDateSchedule(day, 2)
 }
 
-func Every(interval uint) scheduler {
-	return scheduler{interval: interval}
-}
-
-func initTimeSchedule(interval uint, unit int) timeSchedule {
+func initTimeSchedule(interval int, typ int) *timeSchedule {
+	if interval < 1 {
+		interval = 1
+	}
 	var timeSchedule timeSchedule
 	timeSchedule.interval = interval
-	timeSchedule.unit = unit
-	timeSchedule.from = newRunTime()
+	timeSchedule.typ = typ
+	timeSchedule.runTime = runTime{}
 
-	return timeSchedule
+	return &timeSchedule
 }
 
-func initDateSchedule(interval uint) dateSchedule {
+func initDateSchedule(day int, typ int) *dateSchedule {
 	var dateSchedule dateSchedule
-	dateSchedule.interval = interval
-	dateSchedule.at = newRunTime()
-
-	return dateSchedule
-}
-
-func newRunTime() runTime {
-	return runTime{
+	dateSchedule.typ = typ
+	dateSchedule.day = day
+	dateSchedule.runTime = runTime{
 		hour:   time.Now().Hour(),
 		minute: time.Now().Minute(),
 		second: time.Now().Second(),
 	}
+
+	return &dateSchedule
 }
