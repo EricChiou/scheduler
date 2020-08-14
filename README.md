@@ -1,6 +1,4 @@
 # scheduler
-
-
   
 ## How to use
 ```go
